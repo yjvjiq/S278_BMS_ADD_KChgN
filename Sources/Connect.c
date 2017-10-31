@@ -32,7 +32,7 @@ void bmsModeAwake(void)
             status_group4.Bit.Mode_BMS_Work = 2;//充电状态 
             status_group3.Bit.St_CHG_Mode = 1;//充电模式等于DC充电
             status_group3.Bit.St_Charge = 1;//正在充电 
-            InsRelayControl=1;//快充时采绝缘控制给SBMS
+            g_bms_sbms_ctrl_cmd.cmd_InsRelay_ctrl=1;//快充时采绝缘控制给SBMS
             stateCode=141;
         }
         else
@@ -113,7 +113,7 @@ void SignalOnOffJudge(void)
 			DC_DisConnect++;//直流拔枪延时检测,必须连续检测到200*5ms时间才可以
 			if(DC_DisConnect>=100)
 			{
-				InsRelayControl=0;//快充时采绝缘控制给SBMS 
+				g_bms_sbms_ctrl_cmd.cmd_InsRelay_ctrl = 0;//快充时采绝缘控制给SBMS 
 				plug_DC_Connect=0;
 				if(g_BmsModeFlag == FASTRECHARGING)
 				{                  

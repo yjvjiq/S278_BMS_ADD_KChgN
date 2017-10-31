@@ -30,7 +30,7 @@ static TASK_COMPONENTS TaskComps[] =
     {0, 17,     20,     TaskVoltage},               // 总电压计算   .
 //    {0, 297,	300,	TaskInsulation},            // 绝缘电阻计算 //该处时间最小600MS，不能太小  80ms
 	{0, 2097,	2100,	TaskInsulation},			// 绝缘电阻计算 //该处时间最小600MS，不能太小  80ms
-    {0, 97,     100,    TaskReport2PC},             // 发送报文到上位机
+    {0, 7,     10,    TaskReport2PC},             // 发送报文到上位机
     {0, 5,      5,      TaskStatusMachine},         // 状态机处理
     {0, 997,    1000,   TaskFaultProcess},          // 100ms故障处理
     //{0, 8,      8,    TaskRechargeDC},            // 直流充电 不能放开
@@ -348,10 +348,12 @@ void TaskStatusMachine(void)//task period = 5ms.
         case 14:  //***********************闭合主负************/////////////
         case 84:
         case 144:
+			if(stateCode == 84 || stateCode == 144){
+    			//KChg_N_Switch(ON);
+    			g_bms_sbms_ctrl_cmd.cmd_Kchg_N_ctrl = 1;
+			}
+			
 			Kn_Switch(ON); // when in 14 state, it used for HV POWER, else turn on Kn to supply for DCDC in charge mode.
-//			if(stateCode == 84 || stateCode == 144){
-//    			KChg_N_Switch(ON);
-//			}
             
             Delay14++;
             if(Delay14 >= 4)
@@ -494,7 +496,7 @@ void TaskStatusMachine(void)//task period = 5ms.
 			
             break;
         case 180:
-            InsRelayControl=0;//关闭绝缘检测开关
+            g_bms_sbms_ctrl_cmd.cmd_InsRelay_ctrl=0;//关闭绝缘检测开关
             TurnOffInsulation();//关闭绝缘检测的开关
             status_group3.Bit.St_Charge = 2; //充电结束
             status_group1.Bit.St_BMS =2;//高压断开
@@ -510,9 +512,15 @@ void TaskStatusMachine(void)//task period = 5ms.
             {
 				Kp_Switch(OFF);
 			}
-			KEleBand_P_Switch(OFF);
-			Kn_Switch(OFF);
+			
+			if(stateCode == 44){
+                Kn_Switch(OFF);
+			}
+			else{
+			    KChg_N_Switch(OFF);
+			}
             
+            KEleBand_P_Switch(OFF);
             TurnOffNRelay=1;//断负极继电器完成标志
             break;  
             

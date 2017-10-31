@@ -32,7 +32,6 @@ BMS_FAN_CONTROL  BMS_Fan_Control;
 float	g_highVoltageV4; // V1B
 float	g_highVoltageV5; // V2B
 float	g_highVoltageV6; // V3B
-unsigned char InsRelayControl = 0;//绝缘控制继电器控制
 //*************************************************************************************
 //*************************************************************************************
 //*****************以下是BMS给PC发消息子程序*****************************************
@@ -240,9 +239,9 @@ void bmsToSBMSMessage1(void)
 	mg.len = 8;
 	mg.prty = 0;
 
-	mg.data[0]= InsRelayControl;//绝缘控制继电器的控制 
-	mg.data[1]= St_heatManage; 
-	mg.data[2]= 0;
+	mg.data[0]= g_bms_sbms_ctrl_cmd.cmd_InsRelay_ctrl;//绝缘控制继电器的控制 
+	mg.data[1]= g_bms_sbms_ctrl_cmd.cmd_heat_ctrl; 
+	mg.data[2]= g_bms_sbms_ctrl_cmd.cmd_Kchg_N_ctrl;
 	mg.data[3]= 0;
 
 	mg.data[4]= 0; 

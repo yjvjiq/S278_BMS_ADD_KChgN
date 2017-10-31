@@ -334,7 +334,6 @@ extern void InTestToPC(void);
 extern float g_highVoltageV4; //受电弓充电继电器电压
 extern float g_highVoltageV5; //快充充电继电器电压
 extern float g_highVoltageV6;
-extern unsigned char InsRelayControl;
 //****************************************************
 //*****************************************************8
 //*******************************************************8

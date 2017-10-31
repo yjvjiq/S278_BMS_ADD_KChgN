@@ -358,6 +358,13 @@ typedef union{
 	S_TMS_BMS_MSG msg;
 	byte data[8];
 }U_TMS_BMS_MSG;
+                       
+typedef struct{
+    byte cmd_InsRelay_ctrl  :1;
+    byte cmd_heat_ctrl      :1;
+    byte cmd_Kchg_N_ctrl    :1;
+    byte reserved           :5;
+} BMS_SBMS_CTRL_CMD;
 
 
 //******************************************************************************
@@ -369,6 +376,8 @@ extern VCU_CONTROL VCU_Control;			//0x1802D2D0
 extern VCU_CHGCONTROL VCU_ChgControl;	//0x0C0217A7
 extern VCU_CHGCONTROL_2 VCU_ChgControl_2;	//0x0C0217A7
 extern VCU_PARKINGBRAKE VCU_ParkBrake;	//0x18FEF117
+
+extern BMS_SBMS_CTRL_CMD   g_bms_sbms_ctrl_cmd;
 
 extern STATUS_GROUP1 status_group1;
 extern STATUS_GROUP2 status_group2;
@@ -397,9 +406,6 @@ extern float BiggestDisPowerContinuous;     //最大持续放电功率
 extern float BiggestFeedbackContinuous;     //最大持续回馈功率
 
 extern unsigned int chargeRemainderTime;    //剩余充电时间
-
-
-extern unsigned char St_heatManage;         //动力电池热管理状态：0没工作；1加热过程中；2cooling
 
 extern unsigned long int chargeAH;          //实际充电总安时
 extern unsigned long int dischargeAH;       //实际放电总安时

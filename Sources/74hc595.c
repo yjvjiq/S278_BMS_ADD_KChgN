@@ -342,10 +342,12 @@ void KChg_N_Switch(byte status){
 	if(status == ON){
 		TurnOn_INBK();
 		BmsCtlStat0 |=0x08;
+		g_bms_sbms_ctrl_cmd.cmd_Kchg_N_ctrl = 1;// command send to SBMS, to control the relay on.
 	}
 	else{
 		TurnOff_INBK();
 		BmsCtlStat0 &=0xf7;//预充接触器状态断开
+		g_bms_sbms_ctrl_cmd.cmd_Kchg_N_ctrl = 0;
 	}
 }
 
@@ -370,11 +372,11 @@ void KFastChg_P_Switch(byte status){
 void KHeat_Switch(byte status){
 	if(status == ON){
 		TurnOn_INHK();
-	    St_heatManage = 1;//动力电池热管理状态：0没工作；1加热过程中；2cooling
+	    g_bms_sbms_ctrl_cmd.cmd_heat_ctrl = 1;//动力电池热管理状态：0没工作；1加热过程中；2cooling
 	}
 	else{
 		TurnOff_INHK();
-		St_heatManage = 0;//动力电池热管理状态：0没工作；1加热过程中；2cooling
+		g_bms_sbms_ctrl_cmd.cmd_heat_ctrl = 0;//动力电池热管理状态：0没工作；1加热过程中；2cooling
 	}
 }
 /************LCD******************************************

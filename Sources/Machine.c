@@ -229,7 +229,7 @@ void HighVoltDetectPart1(void)
     //********检测主负继电器粘连 *****************//////////////////////////////////
     if(g_BmsModeFlag == DISCHARGING)
     {
-        if(g_highVoltageV2 >= 200)
+        if(g_highVoltageV2 > 200)
         {
             pp++;
             if(pp>=12)//60ms
@@ -254,10 +254,10 @@ void HighVoltDetectPart1(void)
 	  if(g_BmsModeFlag == RECHARGING)
 	  {
 		  /////受电带充电继电器粘连///////
-		  if(g_highVoltageV5 > 200 || g_highVoltageV6 > 200)  
+		  if(g_highVoltageV4 > 200)  
 		  {
 			  CCHGConnect_tt++;
-			  if (CCHGConnect_tt>=20)//滤波延时60ms，电压是否能及时变化？
+			  if (CCHGConnect_tt>=20)//滤波延时100ms，电压是否能及时变化？
 			  {
 				  RelayErrorPowerOff = 1;//继电器下电故障
 				  g_caution_Flag_2 |=0x20; //to PC
@@ -278,7 +278,7 @@ void HighVoltDetectPart1(void)
 		if(g_highVoltageV4 > 200)  
 		{
 			DCCHGConnect_tt++;
-			if (DCCHGConnect_tt >= 20)//滤波延时60ms，电压是否能及时变化？
+			if (DCCHGConnect_tt >= 20)//滤波延时100ms，电压是否能及时变化？
 			{
 				RelayErrorPowerOff = 1;//继电器下电故障
 				g_caution_Flag_3 |=0x80; //to PC
@@ -316,11 +316,12 @@ void HighVoltDetectPart2(void)//预充继电器已经闭合
 {    
     static unsigned char NDisConnect_tt=0;
     static unsigned char PConnect_tt=0;
+    static unsigned char CCHGConnect_tt=0;
+    static unsigned char DCCHGConnect_tt=0;
     static unsigned char CHGDisConnect_tt=0;
 	static U16 s_detect_part2_cnt_t = 0;
 
-	
-    if((tmr_p2 <= 60)) //延时20ms或者大于500ms,不在运行 	//||(tmr_p2 >= 600)
+    if((tmr_p2 <= 100)) //延时20ms或者大于500ms,不在运行 	//||(tmr_p2 >= 600)
 	{
 		s_detect_part2_cnt_t = 0;
 		return;
@@ -368,17 +369,78 @@ void HighVoltDetectPart2(void)//预充继电器已经闭合
             PConnect_tt=0;  
         }
     }  
+    
+    if((g_BmsModeFlag == RECHARGING)||(g_BmsModeFlag == FASTRECHARGING))//快慢充 
+    {
+		/////充电负继电器断路///////充电都检
+		if(g_highVoltageV4 < 200)
+		{
+			CHGDisConnect_tt++;
+			if (CHGDisConnect_tt>=20)//滤波延时100ms，电压是否能及时变化？
+			{
+				RelayErrorPowerOff = 1;//继电器下电故障
+				CHG_N_RelayDisConError = 1;//充电负断路故障
+				g_caution_Flag_4 |= (1 << 5); // precharge relay off error.
+				CHGDisConnect_tt = 23;
+            }
+        }
+        else
+        {
+            CHGDisConnect_tt=0;
+        }
+        
+        if(g_BmsModeFlag == RECHARGING)
+        {
+            /////受电带充电继电器粘连///////
+            if(g_highVoltageV6 > 200)  
+            {
+                CCHGConnect_tt++;
+                if (CCHGConnect_tt>=20)//滤波延时100ms，电压是否能及时变化？
+                {
+                    RelayErrorPowerOff = 1;//继电器下电故障
+                    g_caution_Flag_2 |=0x20; //to PC
+                    Error_Group1.Bit.F3_Ele_Relay_Con = 1;//error to VCU
+                    status_group2.Bit.St_Ele_Relay = 2;//受电弓继电器连接
+                    CCHG_RelayConError = 1;//受电弓充电继电器粘连
+                    CCHGConnect_tt = 23;
+                }
+            }
+            else   
+            {
+                CCHGConnect_tt=0;  
+            }
+        }
+        else if(g_BmsModeFlag == FASTRECHARGING)
+        {
+			/////充电继电器粘连///////
+			if(g_highVoltageV5>200)  
+			{
+				DCCHGConnect_tt++;
+				if (DCCHGConnect_tt>=20)//滤波延时60ms，电压是否能及时变化？
+				{
+					RelayErrorPowerOff = 1;//继电器下电故障
+					g_caution_Flag_3 |=0x80; //to PC
+					Error_Group3.Bit.F5_DC_Con_Err = 1;//error to VCU
+					DCCHG_RelayConError = 1;//快充继电器粘连
+					DCCHGConnect_tt = 23;
+                }
+            }
+            else   
+            {
+                DCCHGConnect_tt=0;  
+            }
+        }
+    }
 
-	if(s_detect_part2_cnt_t >= 25 && (g_BmsModeFlag == DISCHARGING))
+	if(s_detect_part2_cnt_t >= 25)
     {
         if(((N_RelayDisConError==0)&&(P_RelayConError==0)&&(stateCode == 17))//负极断路&&正极粘连 
-        ){	//充电负断路&& 快充粘连
+        ||((CHG_N_RelayDisConError==0)&&(CCHG_RelayConError==0)&&(stateCode == 87))//充电负断路&& 受电弓充电粘连
+        ||((CHG_N_RelayDisConError==0)&&(DCCHG_RelayConError==0)&&(stateCode == 147)))//充电负断路&& 快充粘连
+        {
             bmsSelfcheckCounter=2; //正常状态 
         }
     }
-	else if((g_BmsModeFlag == FASTRECHARGING) ||(g_BmsModeFlag == RECHARGING)){
-		bmsSelfcheckCounter=2; //正常状态 
-	}
 }
 //******************************************************************************
 //* Function name:   HighVoltDetectPart3
@@ -421,8 +483,7 @@ void HighVoltDetectPart3(void)
     }
 	
     /////////////受电带充电继电器断路///////
-    if(((g_highVoltageV5 < 200) || (g_highVoltageV6 < 200))
-		&&(stateCode == 90))
+    if((g_highVoltageV6 < 200) && (stateCode == 90))
     {
         CCHGDisConnect_tt ++;
         if (CCHGDisConnect_tt>=20)//滤波延时100ms，电压是否能及时变化？
@@ -440,7 +501,7 @@ void HighVoltDetectPart3(void)
     }
 	
 	/////////////快充继电器断路///////
-	if((g_highVoltageV4 < 200) && (stateCode == 150))
+	if((g_highVoltageV5 < 200) && (stateCode == 150))
 	{
 	    DCHGDisConnect_tt++;
 	    if (DCHGDisConnect_tt >= 20)//滤波延时100ms，电压是否能及时变化？

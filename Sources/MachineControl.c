@@ -165,6 +165,7 @@ void stateCodeTransfer(void)
 				status_group4.Bit.Mode_BMS_Work = 2;//BMS当前工作状态=充电
 				status_group3.Bit.St_CHG_Mode=2;//充电模式等于AC充电
 				status_group3.Bit.St_Charge = 1;//正在充电 
+				Error_Group1.Bit.St_CHG_Allow = 0; //charge allowed
                 stateCode = 81;
                 bmsSelfcheckCounter = 0;            
             }
@@ -284,7 +285,7 @@ void stateCodeTransfer(void)
 		Error_Group1.Bit.St_DisCHG_Allow = 1;	// discharge not allowed.
         if(stateCode == 141)
         {
-            InsRelayControl = 1;//快充时采绝缘控制给SBMS
+            g_bms_sbms_ctrl_cmd.cmd_InsRelay_ctrl = 1;//快充时采绝缘控制给SBMS
             if((status_group3.Bit.St_N_Relay == 0)&&(status_group3.Bit.St_P_Relay == 0)
             &&(CC2VOL<=CC2VOLHIGH)&&(CC2VOL>=CC2VOLLOW)) //CC2电压在范围内
                 stateCode = 142;

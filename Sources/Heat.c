@@ -209,12 +209,12 @@ void T_Ctrl_Process(void){
 		case 1:
 			g_BMS_TMS_msg.msg.mode_cmd = T_CMD_POWER_OFF;
 			KHeat_Switch(OFF);
-			g_BMS_TMS_msg.msg.HV_relay_status = St_heatManage;
+			g_BMS_TMS_msg.msg.HV_relay_status = g_bms_sbms_ctrl_cmd.cmd_heat_ctrl;
 			T_power_on_flag = 0;
 			g_BMS_TMS_msg.msg.HV_on_request = T_CTRL_HV_OFF_REQ; // 0 = power on request, 1 = power off request
 			break;
 		case 2:
-			if(g_TMS_BMS_msg.msg.TMS_HV_status == 1 && T_power_on_flag == 0 && (St_heatManage == 0)){
+			if(g_TMS_BMS_msg.msg.TMS_HV_status == 1 && T_power_on_flag == 0 && (g_bms_sbms_ctrl_cmd.cmd_heat_ctrl == 0)){
 				g_BMS_TMS_msg.msg.HV_on_request = T_CTRL_HV_OFF_REQ;
 				KHeat_Switch(OFF);
 				cnt++;
@@ -231,10 +231,10 @@ void T_Ctrl_Process(void){
 				g_BMS_TMS_msg.msg.HV_on_request = T_CTRL_HV_ON_REQ; // 0 = power on request, 1 = power off request
 			}
 			
-			g_BMS_TMS_msg.msg.HV_relay_status = St_heatManage;
+			g_BMS_TMS_msg.msg.HV_relay_status = g_bms_sbms_ctrl_cmd.cmd_heat_ctrl;
 			break;
 		case 3:
-			if((g_TMS_BMS_msg.msg.TMS_HV_status == 1) && (T_power_on_flag == 0) && (St_heatManage == 0)){
+			if((g_TMS_BMS_msg.msg.TMS_HV_status == 1) && (T_power_on_flag == 0) && (g_bms_sbms_ctrl_cmd.cmd_heat_ctrl == 0)){
 				g_BMS_TMS_msg.msg.HV_on_request = T_CTRL_HV_OFF_REQ;
 				KHeat_Switch(OFF);
 				cnt_2++;
@@ -251,14 +251,14 @@ void T_Ctrl_Process(void){
 				g_BMS_TMS_msg.msg.HV_on_request = T_CTRL_HV_ON_REQ; // 0 = power on request, 1 = power off request
 			}
 			
-			g_BMS_TMS_msg.msg.HV_relay_status = St_heatManage;
+			g_BMS_TMS_msg.msg.HV_relay_status = g_bms_sbms_ctrl_cmd.cmd_heat_ctrl;
 			break;
 		case 4:
 			g_BMS_TMS_msg.msg.mode_cmd = T_CMD_POWER_OFF;
 			g_BMS_TMS_msg.msg.HV_on_request = T_CTRL_HV_OFF_REQ; // 0 = power on request, 1 = power off request
 			if(g_TMS_BMS_msg.msg.TMS_HV_status == 0){
 				KHeat_Switch(OFF);
-				g_BMS_TMS_msg.msg.HV_relay_status = St_heatManage;
+				g_BMS_TMS_msg.msg.HV_relay_status = g_bms_sbms_ctrl_cmd.cmd_heat_ctrl;
 				T_ctrl_state = 0;
 			}
 			
