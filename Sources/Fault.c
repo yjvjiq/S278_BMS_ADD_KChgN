@@ -152,16 +152,18 @@ void errorSystemVoltageOV(void)
         Level=TotalVoltageOverVoltage_custom(g_systemVoltage,g_highVoltageV3,DISCHARGING);
 	}
 	else if(g_BmsModeFlag == FASTRECHARGING){//fast charge mode.
-        Level=TotalVoltageOverVoltage_custom(g_systemVoltage,g_highVoltageV4,FASTRECHARGING);
+        Level=TotalVoltageOverVoltage_custom(g_systemVoltage,g_highVoltageV5,FASTRECHARGING);
 	}
 	else if(g_BmsModeFlag == RECHARGING){ // ACC charge mode.(re-charging mode)
+	/*
 		if(g_highVoltageV5 >= g_highVoltageV6){
 			reharge_pack_v = g_highVoltageV5;
 		}
 		else{
 			reharge_pack_v = g_highVoltageV6;
 		}
-        Level=TotalVoltageOverVoltage_custom(g_systemVoltage,reharge_pack_v,RECHARGING);
+    */
+        Level=TotalVoltageOverVoltage_custom(g_systemVoltage,g_highVoltageV6,RECHARGING);
 	}
 	
     Error_Group4.Bit.F6_Bat_Over_V = Level;//send to vehicle CAN.

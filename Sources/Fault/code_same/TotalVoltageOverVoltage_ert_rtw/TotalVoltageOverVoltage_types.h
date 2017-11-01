@@ -3,9 +3,9 @@
  *
  * Code generated for Simulink model 'TotalVoltageOverVoltage'.
  *
- * Model version                  : 1.113
+ * Model version                  : 1.132
  * Simulink Coder version         : 8.10 (R2016a) 10-Feb-2016
- * C/C++ source code generated on : Tue Aug 08 09:52:32 2017
+ * C/C++ source code generated on : Fri Jun 23 17:06:58 2017
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: Freescale->HC(S)12
