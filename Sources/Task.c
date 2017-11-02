@@ -30,7 +30,7 @@ static TASK_COMPONENTS TaskComps[] =
     {0, 17,     20,     TaskVoltage},               // 总电压计算   .
 //    {0, 297,	300,	TaskInsulation},            // 绝缘电阻计算 //该处时间最小600MS，不能太小  80ms
 	{0, 2097,	2100,	TaskInsulation},			// 绝缘电阻计算 //该处时间最小600MS，不能太小  80ms
-    {0, 7,     10,    TaskReport2PC},             // 发送报文到上位机
+    {0, 7,		10,		TaskReport2PC},             // 发送报文到上位机
     {0, 5,      5,      TaskStatusMachine},         // 状态机处理
     {0, 997,    1000,   TaskFaultProcess},          // 100ms故障处理
     //{0, 8,      8,    TaskRechargeDC},            // 直流充电 不能放开
@@ -214,22 +214,22 @@ void TaskReport2PC(void)
     ct++;
 	switch(ct){
 		case 1:
-			bmsToPcInfo450();
+			bmsToSBMSMessage1(); //0x000c0125
 			break;
 		case 2:
-			bmsToPcInfo451();
+			bmsToPcInfo450();
 			break;
 		case 3:
-			bmsToPcInfo552();
+			bmsToPcInfo451();
 			break;
 		case 4:
-			bmsToPcInfo553();
+			bmsToPcInfo552();
 			break;
 		case 5:
-			bmsToPcInfo554();
+			bmsToPcInfo553();
 			break;
 		case 6:
-			bmsToSBMSMessage1(); //0x000c0125
+			bmsToPcInfo554();
 			ct = 0;
 			break;
 		default:
@@ -350,7 +350,7 @@ void TaskStatusMachine(void)//task period = 5ms.
         case 144:
 			if(stateCode == 84 || stateCode == 144){
     			//KChg_N_Switch(ON);
-    			g_bms_sbms_ctrl_cmd.cmd_Kchg_N_ctrl = 1;
+    			g_bms_sbms_ctrl_cmd.cmd_Kchg_N_ctrl = 1;// send command to SBMS, SBMS control the charge N relay.
 			}
 			
 			Kn_Switch(ON); // when in 14 state, it used for HV POWER, else turn on Kn to supply for DCDC in charge mode.
@@ -365,6 +365,8 @@ void TaskStatusMachine(void)//task period = 5ms.
         case 17:   //***********************电池高压检测*****//////////////
         case 87:
         case 147:
+			delay(25000); //20ms
+			delay(25000); //20ms
             HighVoltDetectPart2();//负极断路与正极粘连
             break;
         case 20:   //*********************正极继电器闭合*******////////////

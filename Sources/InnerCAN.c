@@ -125,26 +125,26 @@ void bmsToPcInfo451(void)
 //******************************************************************************
 void bmsToPcInfo552(void)
 {
-    struct can_msg mg;
-    char tt=100;
-    
-    mg.RTR= FALSE;  
-    mg.len = 8;
-    mg.prty = 0;
-    
-    mg.data[0]= C0552_0; //²âÊÔÄ£Ê½ÏÂA¿ÚµÄ¼ì²â
-    mg.data[1]= BmsCtlStat0 & 0xff;//BMS¿ØÖÆ×´Ì¬
-    mg.data[2]= (g_highestTemperature-40)+48;//µç³Ø×î¸ßÎÂ¶È 
-	  mg.data[3]= (g_lowestTemperature-40)+48;//µç³Ø×îµÍÎÂ¶È 
-	  
-    mg.data[4]= g_caution_Flag_1; //¹ÊÕÏ×´Ì¬
-    mg.data[5]= g_caution_Flag_2;
-    mg.data[6]= g_caution_Flag_3;
-    mg.data[7]= g_caution_Flag_4;
-    
-	  mg.id= 0x000c0552; 
-	  //while(!MSCAN2SendMsg(mg));
-	  while((!MSCAN2SendMsg(mg))&&(tt>0))
+	struct can_msg mg;
+	char tt=100;
+
+	mg.RTR= FALSE;  
+	mg.len = 8;
+	mg.prty = 0;
+
+	mg.data[0]= C0552_0; //²âÊÔÄ£Ê½ÏÂA¿ÚµÄ¼ì²â
+	mg.data[1]= BmsCtlStat0 & 0xff;//BMS¿ØÖÆ×´Ì¬
+	mg.data[2]= (g_highestTemperature-40)+48;//µç³Ø×î¸ßÎÂ¶È 
+	mg.data[3]= (g_lowestTemperature-40)+48;//µç³Ø×îµÍÎÂ¶È 
+
+	mg.data[4]= g_caution_Flag_1; //¹ÊÕÏ×´Ì¬
+	mg.data[5]= g_caution_Flag_2;
+	mg.data[6]= g_caution_Flag_3;
+	mg.data[7]= g_caution_Flag_4;
+
+	mg.id= 0x000c0552; 
+	//while(!MSCAN2SendMsg(mg));
+	while((!MSCAN2SendMsg(mg))&&(tt>0))
         tt--;
 }
 //******************************************************************************

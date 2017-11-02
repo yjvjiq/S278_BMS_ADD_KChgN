@@ -192,7 +192,7 @@ void stateCodeTransfer(void)
 				||(g_bms_fault_msg.fault.HLVol_Lock_Alram == 1)){
 				stateCode = 126;
 			}
-            else if((MSDError==1)||(CCHG_RelayConError == 1)||(PantographOff)
+            else if((MSDError==1)||(CHG_N_RelayConError == 1)||(PantographOff)
             ||(VCU_ChgControl.Bit.rise_Eleband_Switch == 0)
             ||(VCU_ChgControl.Bit.downC_OK == 1)
             ||(VCU_ChgControl_2.Bit.rise_Eleband_No_OK == 1)
@@ -208,7 +208,7 @@ void stateCodeTransfer(void)
 				||(VCU_ChgControl_2.Bit.rise_Eleband_No_OK == 1)
 				||(VCU_ParkBrake.Bit.Parking_Brake==0)||(PantographOff)){
                 stateCode = 124;//降弓开关==0||降弓到位==0||驻车信号==0||需要下电故障
-				}
+			}
             else{// if((BmsCtlStat0&0x08)!=0)//降弓到位&&降弓开关
                 stateCode = 87;//充电负已闭合
             }
@@ -317,7 +317,7 @@ void stateCodeTransfer(void)
 				}
 				
 			}
-            else if((MSDError)||(DCCHG_RelayConError == 1)||(plug_DC_Connect == 0)||(OffState))
+            else if((MSDError)||(CHG_N_RelayConError == 1)||(plug_DC_Connect == 0)||(OffState))
                 stateCode = 186;//高压检测1有故障||需下电的故障||CC2==0 ||ChargeIN==0
             else if((plug_DC_Connect == 1)&&(bmsSelfcheckCounter==1) && (DC_Start == 1))
                 stateCode = 144;

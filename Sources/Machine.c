@@ -182,8 +182,6 @@ void HighVoltDetectPart1(void)
     static unsigned char tt=0;
     static unsigned char pp=0;
     static unsigned char pc=0;
-    static unsigned char CCHGConnect_tt=0;
-    static unsigned char DCCHGConnect_tt=0;
 	static U16 s_detect_part1_cnt_t = 0;
 	static U8 hv_lock_error_cnt = 0;
 
@@ -251,56 +249,35 @@ void HighVoltDetectPart1(void)
     }
 	
     //********检测充电负继电器粘连 *****************//////////////////////////////////
-	  if(g_BmsModeFlag == RECHARGING)
-	  {
-		  /////受电带充电继电器粘连///////
-		  if(g_highVoltageV4 > 200)  
-		  {
-			  CCHGConnect_tt++;
-			  if (CCHGConnect_tt>=20)//滤波延时100ms，电压是否能及时变化？
-			  {
-				  RelayErrorPowerOff = 1;//继电器下电故障
-				  g_caution_Flag_2 |=0x20; //to PC
-				  Error_Group1.Bit.F3_Ele_Relay_Con = 1;//error to VCU
-				  status_group2.Bit.St_Ele_Relay = 2;//受电弓继电器连接
-				  CCHG_RelayConError = 1;//受电弓充电继电器粘连
-				  CCHGConnect_tt = 23;
-			  }
-		  }
-		  else	 
-		  {
-			  CCHGConnect_tt=0;  
-		  }
-	  }
-	  else if(g_BmsModeFlag == FASTRECHARGING)
-	  {
-		/////充电继电器粘连///////
-		if(g_highVoltageV4 > 200)  
-		{
-			DCCHGConnect_tt++;
-			if (DCCHGConnect_tt >= 20)//滤波延时100ms，电压是否能及时变化？
-			{
-				RelayErrorPowerOff = 1;//继电器下电故障
-				g_caution_Flag_3 |=0x80; //to PC
-				Error_Group3.Bit.F5_DC_Con_Err = 1;//error to VCU
-				DCCHG_RelayConError = 1;//快充继电器粘连
-				DCCHGConnect_tt = 23;
-			  }
-		  }
-		  else	 
-		  {
-			  DCCHGConnect_tt=0;  
-		  }
-	  }
-
+    if((g_BmsModeFlag == RECHARGING)||(g_BmsModeFlag == FASTRECHARGING))
+    {
+        if(g_highVoltageV4 >= 200)
+        {
+            pc++;
+            if(pc>=20)//100ms
+            {
+                /////////////////充电负极粘连///////////////////
+                RelayErrorPowerOff = 1;//继电器下电故障
+                Error_Group1.Bit.F2_DCChg_Neg_Relay_Con = 1;//直流充电负粘连报警位也作为受电弓负
+                CHG_N_RelayConError = 1;
+				pc=21;
+                /////////////////充电负极粘连///////////////////
+            }
+        } 
+        else
+        {
+             pc=0;
+        }
+    }
+    
     if((MSDError == 0)
 		&& (g_bms_fault_msg.fault.HLVol_Lock_Alram == 0)
 		&& (s_detect_part1_cnt_t >= 25))//all BMS mode need detect.
     {
         if(((N_RelayConnetError==0)&&(stateCode == 12))//行车
-          ||((CCHG_RelayConError==0)&&(stateCode == 82))//受电弓
-          ||((DCCHG_RelayConError==0)&&(stateCode == 142))
-          )//快充
+          ||((CHG_N_RelayConError==0)&&(stateCode == 82))//受电弓
+          ||((CHG_N_RelayConError==0)&&(stateCode == 142))
+          )
         {
             bmsSelfcheckCounter=1; //正常状态 
         } 
@@ -412,7 +389,7 @@ void HighVoltDetectPart2(void)//预充继电器已经闭合
         }
         else if(g_BmsModeFlag == FASTRECHARGING)
         {
-			/////充电继电器粘连///////
+			/////快充继电器粘连///////
 			if(g_highVoltageV5>200)  
 			{
 				DCCHGConnect_tt++;
