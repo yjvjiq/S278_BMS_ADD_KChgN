@@ -426,7 +426,7 @@ void cpuToCHMBCP(void)
 //* EntryParameter : None
 //* ReturnValue    : None
 //******************************************************************************
- void cpuToCHMBCPDATA2(void)
+void cpuToCHMBCPDATA2(void)
 {
 	struct can_msg mg;
 	unsigned int buff;
@@ -618,24 +618,45 @@ void cpuToCHMBCSDATA2(void)
 {
     struct can_msg mg;
     char tt=100;
-    
+	float DCChgLeftTime_t = 0;
+	U16 left_time_real_current = 0;
+	
     mg.RTR= FALSE;  
     mg.len = 8;
     mg.prty = 0;
-    if((g_systemCurrent<=-5)&&(Can_g_socValue<0.992))
-        DCLeftTime=(unsigned int)((Q2*(1-Can_g_socValue)*60)/(-g_systemCurrent));
-    else if(Can_g_socValue>=0.992)
-        chargeRemainderTime=2;
-    chargeRemainderTime=DCLeftTime*60;
+    if((g_systemCurrent<=-5)&&(Can_g_socValue<0.992)){
+        left_time_real_current=(unsigned int)((Q2*(1-Can_g_socValue)*60)/(-g_systemCurrent));
+    }
+    else if(Can_g_socValue>=0.992){
+//		chargeRemainderTime=2;
+		left_time_real_current = 2 * 60; // it's a const value.
+    }
+//	chargeRemainderTime=DCLeftTime*60;
+
+	DCChrgTime_step((float)Tavg, Can_g_socValue, &DCChgLeftTime_t);
+
+	if(left_time_real_current >= (U16)DCChgLeftTime_t){
+		DCLeftTime = left_time_real_current;
+	}
+	else{
+		DCLeftTime = (U16)DCChgLeftTime_t;
+	}
+
+	if(DCLeftTime >= 600){
+		DCLeftTime = 600;
+	}
+	else{
+		// do nothing here;
+	}
 	
-	mg.data[0]= 0x2;//
-	mg.data[1]=(unsigned char)DCLeftTime;//	
-	mg.data[2]= DCLeftTime>>8;//
-	mg.data[3]= 0xff;//
-	mg.data[4]= 0xff;// 
-	mg.data[5]= 0xff;// 
-	mg.data[6]= 0xff;// 	  
-	mg.data[7]= 0xff;//
+	mg.data[0]= 0x2;
+	mg.data[1]=(U8)((U16)DCLeftTime & 0x00FF);
+	mg.data[2]= (U8)((U16)DCLeftTime >> 8);
+	mg.data[3]= 0xff;
+	mg.data[4]= 0xff;
+	mg.data[5]= 0xff;
+	mg.data[6]= 0xff;
+	mg.data[7]= 0xff;
     
     mg.id= 0x1ceb56f4;
     

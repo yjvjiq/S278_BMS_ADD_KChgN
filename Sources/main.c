@@ -21,7 +21,7 @@
 
 /* global variables definitions */
 //BMS Software Version define
-unsigned char BMS_SW_Version[8]={0x0b,0x01,0x16,0x09,0x16,0x00,0x01,0x03};//b116.0830.011 //s278 project
+unsigned char BMS_SW_Version[8]={0x0b,0x01,0x16,0x11,0x09,0x00,0x01,0x01};//b116.0830.011 //s278 project
 unsigned char BMUOK=0;
 unsigned char HeatFlag; //上电前温度标志位
 //**********************************************************************
@@ -67,7 +67,8 @@ void main(void)
 	BMU_initial();//////BMU自检
 	GetDCTem();/////此处调用是充电初始时检测插座温度异常和CC2电压用
 	bmsModeAwake();//系统模式判断
-    
+    DCChrgTime_initialize();// charge left time calculate initialize.
+	
     if(g_highestTemperature>(45+40)){
         Tavg=g_highestTemperature;
     }
