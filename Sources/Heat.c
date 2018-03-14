@@ -159,6 +159,7 @@ void T_Ctrl_Process(void){
 	static U8 T_power_on_flag = 0;
 	static U16 cnt = 0;
 	static U16 cnt_2 = 0;
+	static U16 cnt_3 = 0;
 	
   	if(stateCode != 30 && stateCode != 110 && stateCode != 170){
 		g_BMS_TMS_msg.msg.HV_on_request = T_CTRL_HV_OFF_REQ;
@@ -208,13 +209,31 @@ void T_Ctrl_Process(void){
 	switch(T_ctrl_state){
 		case 1:
 			g_BMS_TMS_msg.msg.mode_cmd = T_CMD_POWER_OFF;
-			KHeat_Switch(OFF);
+			if(g_TMS_BMS_msg.msg.fault_level == 1){
+				if(g_TMS_BMS_msg.msg.TMS_HV_status == 0){
+					KHeat_Switch(OFF);
+					cnt_3 = 0;
+				}
+				else{
+					cnt_3++; // 5ms, run period.
+					if(cnt_3 >= 1000){
+						cnt_3 = 1000;
+						KHeat_Switch(OFF);
+					}
+				}
+			}
+			else{
+				KHeat_Switch(OFF);
+				cnt_3 = 0;
+			}
 			g_BMS_TMS_msg.msg.HV_relay_status = g_bms_sbms_ctrl_cmd.cmd_heat_ctrl;
 			T_power_on_flag = 0;
 			g_BMS_TMS_msg.msg.HV_on_request = T_CTRL_HV_OFF_REQ; // 0 = power on request, 1 = power off request
 			break;
 		case 2:
-			if(g_TMS_BMS_msg.msg.TMS_HV_status == 1 && T_power_on_flag == 0 && (g_bms_sbms_ctrl_cmd.cmd_heat_ctrl == 0)){
+			if(g_TMS_BMS_msg.msg.TMS_HV_status == 1 && 
+				T_power_on_flag == 0 && 
+				(g_bms_sbms_ctrl_cmd.cmd_heat_ctrl == 0)){
 				g_BMS_TMS_msg.msg.HV_on_request = T_CTRL_HV_OFF_REQ;
 				KHeat_Switch(OFF);
 				cnt++;
